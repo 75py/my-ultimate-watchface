@@ -64,7 +64,7 @@ GOAL_PROGRESS を含む編集可能な ComplicationSlot、時刻の桁別表示�
 | 秒 | `[SECOND_Z]`（インタラクティブのみ） | v1+ | 数値 | なし | AODでは非表示 |
 | 天気 | `[WEATHER.*]`（IS_AVAILABLE/TEMPERATURE/DAY_TEMPERATURE_HIGH/LOW/CONDITION/CONDITION_NAME/HOURS） | v2+ | 構造化データ | Wear OS の天気データソース（Googleアプリ等） | `--°`（IS_AVAILABLE/IS_ERROR で出し分け） |
 | 心拍数 | `[HEART_RATE]` | v1+ | 数値（約1分間隔の最新値） | ウォッチ本体のHRセンサー | `--`（1未満の場合） |
-| 次回アラーム | ComplicationSlot #10（SHORT_TEXT） | v2+ | 短いテキスト | 時計アプリ等の「次のアラーム」コンプリケーションをユーザーが割当 | `--`（EMPTY時） |
+| 次回アラーム | ComplicationSlot #10（SHORT_TEXT） | v2+ | 短いテキスト | 時計アプリ等の「次のアラーム」コンプリケーションをユーザーが割当 | `未設定`（EMPTY時） |
 | 距離 | ComplicationSlot #11（GOAL_PROGRESS/SHORT_TEXT） | v2+ | コンプリケーション | Fitbit/Health Connect連携アプリ等をユーザーが割当 | `--`（EMPTY時） |
 | 歩数 | `[STEP_COUNT]` / `[STEP_GOAL]` | v1+ | 数値 | ウォッチ本体の歩数計 | `0` は実値として表示（未取得は発生しない前提） |
 | 消費カロリー | ComplicationSlot #12（GOAL_PROGRESS/SHORT_TEXT） | v2+ | コンプリケーション | Fitbit/Health Connect連携アプリ等をユーザーが割当 | `--`（EMPTY時） |
@@ -73,14 +73,31 @@ GOAL_PROGRESS を含む編集可能な ComplicationSlot、時刻の桁別表示�
 
 - アラーム・距離・消費カロリーに対応する WFF 標準タグは存在しないため、
   **編集可能な ComplicationSlot** を用意し、利用者が提供元を選択する方式です。
-  初期状態は EMPTY（`--` 表示）です。特定アプリ名やコンポーネント名はプリセットしていません。
+  初期状態は EMPTY（アラームは `未設定`、距離・カロリーは `--` 表示）です。
+  データソースとして特定アプリ名やコンポーネント名はプリセットしていません。
 - 「アラームなし」と「未取得」の区別は提供元のテキスト内容に依存します。
-  どちらもアイコン＋`--` で表示されます。
+  アラームスロットがEMPTY（プロバイダ未割当）の場合は `未設定` と表示し、
+  タップするとアラーム設定アプリが開きます。
 - 距離の集計対象（徒歩距離のみか等）・消費カロリーが活動分か総消費かは、
   割り当てたコンプリケーション提供元の仕様に従います。
 - 歩数の円弧のみ `[STEP_PERCENT]` で進捗連動し、`clamp()` で表示範囲に収めます。
   目標値なし/ゼロ除算の場合は中立的なトラック表示です。距離・カロリー・心拍・
   アラームの円弧は静的なアクセント表示です。
+
+## タップ動作
+
+時刻・秒以外の各項目をタップすると対応するアプリ/画面を開きます（WFF `Launch` 要素）。
+
+| 領域 | 遷移先 |
+|---|---|
+| 日付 | カレンダーアプリ（システムターゲット `CALENDAR`） |
+| 天気 | Google Weatherアプリ（`com.google.android.wearable.weather`。未インストール時は Play Store のインストール画面が開きます。Wear OS 6 で Pixel Weather に置き換わった端末では `com.google.android.apps.weather` への変更を検討してください） |
+| 心拍数 | デフォルトの心拍計測アプリ（システムターゲット `HEALTH_HEART_RATE`。Pixel Watch では Fitbit） |
+| 歩数 | Fitbit（Google Health）アプリ（`com.fitbit.FitbitMobile`。未インストール時は Play Store のインストール画面） |
+| アラーム（プロバイダ割当済み） | プロバイダ自身のタップアクション（通常はアラームアプリ） |
+| アラーム（EMPTY=未割当） | `未設定` と表示され、アラーム設定アプリ（システムターゲット `ALARM`）を開きます |
+| 距離・消費カロリー（プロバイダ割当済み） | プロバイダ自身のタップアクション |
+| 距離・消費カロリー（EMPTY=未割当） | Fitbit アプリを開きます |
 
 ## ビルド方法
 
@@ -120,9 +137,9 @@ adb install -r watchface/build/outputs/apk/debug/watchface-debug.apk
 
 ## Complication の設定（アラーム・距離・消費カロリー）
 
-1. ウォッチ上で文字盤を長押し → 歯車アイコン（編集）
+1. ウォッチ上で文字盤を長押し → 鉛筆アイコン（編集）
 2. 各スロットをタップして提供元を選択
-   - 右中央のスロット: 時計アプリ等の「次のアラーム」（SHORT_TEXT）
+   - 右上のスロット: 時計アプリ等の「次のアラーム」（SHORT_TEXT）
    - 下中央のスロット: 距離（GOAL_PROGRESS または SHORT_TEXT）
    - 右下のスロット: 消費カロリー（GOAL_PROGRESS または SHORT_TEXT）
 3. 提供元が見つからない場合は `--` 表示のままになります。
@@ -149,13 +166,18 @@ adb install -r watchface/build/outputs/apk/debug/watchface-debug.apk
 - APK の署名（v2、Android Debug 証明書）と `aapt2` によるパッケージ情報の確認
 - Wear OS 5 エミュレータ（円形）での通常表示・AOD 表示のスクリーンショット確認
 - 通常表示/AOD で HH:MM の座標・サイズが同一であること
-- 天気/心拍/アラーム/距離/カロリー未取得時の `--` フォールバック表示
+- 天気/心拍/距離/カロリー未取得時の `--`、アラーム未割当時の `未設定` フォールバック表示
 - `sample.png` との比較による配置・配色・情報優先順位の整合
+- エミュレータで3スロットへプロバイダ割当 → 値の描画を確認（アラーム=Clock、距離/カロリー=テスト用プロバイダ）
+- タップ動作：日付→カレンダー、天気→Play Store誘導（エミュレータに天気アプリ無し）、歩数→Play Store誘導、
+  アラーム未設定→アラームアプリ、アラーム割当済み→アラーム設定画面（プロバイダのタップアクション）、
+  距離EMPTY→Fitbitインストール誘導
 
 未検証:
 
 - 実機（Pixel Watch）での表示・消費電力・実センサー値
-- 実際の天気データ・心拍・アラーム/距離/カロリーのコンプリケーション提供元割当時の表示
+- `HEALTH_HEART_RATE` の起動（エミュレータにデフォルト心拍アプリがなく未確認。Pixel Watch では Fitbit が開く想定）
+- 実際の天気データ・心拍・距離/カロリー用プロバイダ（Fitbit 等）割当時の表示
 - 5桁以上の歩数など大きな数値での折返し・はみ出し（式は `%,d`・`clamp` 済み）
 - AAB の Play Console アップロード（アップロード鍵未作成のため）
 
