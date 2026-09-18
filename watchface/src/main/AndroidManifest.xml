@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+  <uses-feature android:name="android.hardware.type.watch" />
+
+  <!-- Note: hasCode is required to be false for Watch Face Format -->
+  <application
+      android:label="@string/watch_face_name"
+      android:hasCode="false"
+      android:allowBackup="false">
+
+    <meta-data
+        android:name="com.google.android.wearable.standalone"
+        android:value="true" />
+
+    <!--
+      Watch Face Format version 2 is the lowest version that supports all of
+      this face's features (weather data, goal-progress complications,
+      per-digit time sources). WFF v2 requires Wear OS 5 (API 34).
+    -->
+    <property
+        android:name="com.google.wear.watchface.format.version"
+        android:value="2" />
+
+    <property
+        android:name="com.google.wear.watchface.format.publisher"
+        android:value="my-ultimate-watchface-1.0.0" />
+  </application>
+</manifest>

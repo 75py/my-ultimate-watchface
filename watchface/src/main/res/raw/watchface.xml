@@ -1,0 +1,569 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+  My Ultimate Watch Face — Watch Face Format v2 (Wear OS 5 / API 34+)
+
+  Layout on a 450x450 virtual canvas (scaled to the physical display):
+    - top center    : date (M月D日（曜）)
+    - below date    : weather block (icon + current temp + today high/low + condition name)
+    - center        : large HH:MM at the geometric center, fixed position,
+                      per-digit boxes so changing digits never shift the layout
+    - right of MM   : small seconds (interactive mode only)
+    - upper left    : heart rate (9-11 o'clock, pink arc on the rim)
+    - upper right   : next alarm (1-3 o'clock, indigo arc, editable complication slot)
+    - left-lower    : steps (7-9 o'clock, green arc driven by STEP_PERCENT)
+    - bottom        : distance (5-7 o'clock, blue arc, editable complication slot)
+    - right-lower   : calories burned (3-5 o'clock, orange arc, editable slot)
+  WFF expressions cannot read complication values outside their slot, so only
+  the steps arc is progress-linked; the other arcs are fixed accent tracks.
+  Ambient (AOD): only the date and HH:MM remain, dimmed, at identical positions.
+-->
+<WatchFace width="450" height="450" clipShape="CIRCLE">
+
+  <Metadata key="CLOCK_TYPE" value="DIGITAL" />
+  <Metadata key="PREVIEW_TIME" value="10:08:36" />
+  <Metadata key="STEP_GOAL" value="10000" />
+
+  <!-- Weather condition icons, selected by the [WEATHER.CONDITION] enum value
+       rendered through a BitmapFont (same technique as the official Weather sample). -->
+  <BitmapFonts>
+    <BitmapFont name="weather_icons_day">
+      <Character name="0" resource="w_unknown" width="96" height="96" />
+      <Character name="1" resource="w_clear_day" width="96" height="96" />
+      <Character name="2" resource="w_cloud" width="96" height="96" />
+      <Character name="3" resource="w_fog" width="96" height="96" />
+      <Character name="4" resource="w_heavy_rain" width="96" height="96" />
+      <Character name="5" resource="w_heavy_snow" width="96" height="96" />
+      <Character name="6" resource="w_rain" width="96" height="96" />
+      <Character name="7" resource="w_snow" width="96" height="96" />
+      <Character name="8" resource="w_sunny" width="96" height="96" />
+      <Character name="9" resource="w_thunder" width="96" height="96" />
+      <Word name="10" resource="w_sleet" width="96" height="96" />
+      <Word name="11" resource="w_light_snow" width="96" height="96" />
+      <Word name="12" resource="w_light_rain" width="96" height="96" />
+      <Word name="13" resource="w_mist" width="96" height="96" />
+      <Word name="14" resource="w_partly_day" width="96" height="96" />
+      <Word name="15" resource="w_wind" width="96" height="96" />
+    </BitmapFont>
+    <BitmapFont name="weather_icons_night">
+      <Character name="0" resource="w_unknown" width="96" height="96" />
+      <Character name="1" resource="w_night" width="96" height="96" />
+      <Character name="2" resource="w_cloud" width="96" height="96" />
+      <Character name="3" resource="w_fog" width="96" height="96" />
+      <Character name="4" resource="w_heavy_rain" width="96" height="96" />
+      <Character name="5" resource="w_heavy_snow" width="96" height="96" />
+      <Character name="6" resource="w_rain" width="96" height="96" />
+      <Character name="7" resource="w_snow" width="96" height="96" />
+      <Character name="8" resource="w_night" width="96" height="96" />
+      <Character name="9" resource="w_thunder" width="96" height="96" />
+      <Word name="10" resource="w_sleet" width="96" height="96" />
+      <Word name="11" resource="w_light_snow" width="96" height="96" />
+      <Word name="12" resource="w_light_rain" width="96" height="96" />
+      <Word name="13" resource="w_mist" width="96" height="96" />
+      <Word name="14" resource="w_partly_night" width="96" height="96" />
+      <Word name="15" resource="w_wind" width="96" height="96" />
+    </BitmapFont>
+  </BitmapFonts>
+
+  <Scene backgroundColor="#ff000000">
+
+    <!-- ============================================================ -->
+    <!-- Elements kept in ambient mode (dimmed): date + HH:MM         -->
+    <!-- Their geometry never changes between interactive and ambient -->
+    <!-- ============================================================ -->
+    <Group x="0" y="0" width="450" height="450" name="ambient_kept">
+      <Variant mode="AMBIENT" target="alpha" value="150" />
+
+      <!-- Date: 9月15日（火） -->
+      <PartText x="100" y="56" width="250" height="34" name="date">
+        <Localization calendar="GREGORIAN" timeZone="SYNC_TO_DEVICE" />
+        <Text align="CENTER">
+          <Font family="poppins_medium" size="26" color="#ffffffff">
+            <Template><![CDATA[%s月%s日（%s）]]>
+              <Parameter expression="[MONTH]" />
+              <Parameter expression="[DAY]" />
+              <Parameter expression="[DAY_OF_WEEK_S]" />
+            </Template>
+          </Font>
+        </Text>
+      </PartText>
+
+      <!-- HH:MM — geometric center of the 450x450 canvas is (225,225);
+           the clock group is centered on it horizontally. -->
+      <Group x="83" y="168" width="284" height="120" name="clock">
+        <DigitalClock x="0" y="0" width="284" height="120">
+          <Localization calendar="GREGORIAN" timeZone="SYNC_TO_DEVICE" />
+          <TimeText format="hh_10" hourFormat="24" x="0" y="0" width="64" height="120" align="CENTER">
+            <Font family="poppins_light" size="110" color="#ffe9faf7" />
+          </TimeText>
+          <TimeText format="hh_1" hourFormat="24" x="64" y="0" width="64" height="120" align="CENTER">
+            <Font family="poppins_light" size="110" color="#ffe9faf7" />
+          </TimeText>
+          <TimeText format="mm_10" hourFormat="24" x="156" y="0" width="64" height="120" align="CENTER">
+            <Font family="poppins_light" size="110" color="#ffe9faf7" />
+          </TimeText>
+          <TimeText format="mm_1" hourFormat="24" x="220" y="0" width="64" height="120" align="CENTER">
+            <Font family="poppins_light" size="110" color="#ffe9faf7" />
+          </TimeText>
+        </DigitalClock>
+        <!-- static separator: never moves -->
+        <PartText x="128" y="0" width="28" height="120" name="colon">
+          <Text align="CENTER">
+            <Font family="poppins_light" size="110" color="#ffe9faf7">:</Font>
+          </Text>
+        </PartText>
+      </Group>
+    </Group>
+
+    <!-- ============================================================ -->
+    <!-- Interactive-only content (hidden in ambient mode)            -->
+    <!-- ============================================================ -->
+    <Group x="0" y="0" width="450" height="450" name="interactive_only" alpha="255">
+      <Variant mode="AMBIENT" target="alpha" value="0" />
+
+      <!-- rim tick marks every 30 degrees -->
+      <PartDraw x="0" y="0" width="450" height="450" name="ticks">
+        <Line startX="225.0" startY="9.0" endX="225.0" endY="21.0"><Stroke color="#ff3a4046" thickness="2.5" cap="ROUND" /></Line>
+        <Line startX="333.0" startY="37.9" endX="327.0" endY="48.3"><Stroke color="#ff3a4046" thickness="2.5" cap="ROUND" /></Line>
+        <Line startX="412.1" startY="117.0" endX="401.7" endY="123.0"><Stroke color="#ff3a4046" thickness="2.5" cap="ROUND" /></Line>
+        <Line startX="441.0" startY="225.0" endX="429.0" endY="225.0"><Stroke color="#ff3a4046" thickness="2.5" cap="ROUND" /></Line>
+        <Line startX="412.1" startY="333.0" endX="401.7" endY="327.0"><Stroke color="#ff3a4046" thickness="2.5" cap="ROUND" /></Line>
+        <Line startX="333.0" startY="412.1" endX="327.0" endY="401.7"><Stroke color="#ff3a4046" thickness="2.5" cap="ROUND" /></Line>
+        <Line startX="225.0" startY="441.0" endX="225.0" endY="429.0"><Stroke color="#ff3a4046" thickness="2.5" cap="ROUND" /></Line>
+        <Line startX="117.0" startY="412.1" endX="123.0" endY="401.7"><Stroke color="#ff3a4046" thickness="2.5" cap="ROUND" /></Line>
+        <Line startX="37.9" startY="333.0" endX="48.3" endY="327.0"><Stroke color="#ff3a4046" thickness="2.5" cap="ROUND" /></Line>
+        <Line startX="9.0" startY="225.0" endX="21.0" endY="225.0"><Stroke color="#ff3a4046" thickness="2.5" cap="ROUND" /></Line>
+        <Line startX="37.9" startY="117.0" endX="48.3" endY="123.0"><Stroke color="#ff3a4046" thickness="2.5" cap="ROUND" /></Line>
+        <Line startX="117.0" startY="37.9" endX="123.0" endY="48.3"><Stroke color="#ff3a4046" thickness="2.5" cap="ROUND" /></Line>
+      </PartDraw>
+
+      <!-- perimeter accent arcs, matching each item's clock position on the rim
+           (ring radius 200, thickness 10): HR pink upper-left, alarm indigo
+           upper-right, calories orange right, distance blue bottom, steps green left -->
+      <PartDraw x="0" y="0" width="450" height="450" name="arc_tracks">
+        <Arc centerX="225" centerY="225" width="400" height="400" startAngle="300" endAngle="335">
+          <Stroke color="#66ff5a7e" thickness="10" cap="ROUND" />
+        </Arc>
+        <Arc centerX="225" centerY="225" width="400" height="400" startAngle="25" endAngle="60">
+          <Stroke color="#668fa8ff" thickness="10" cap="ROUND" />
+        </Arc>
+        <Arc centerX="225" centerY="225" width="400" height="400" startAngle="85" endAngle="135">
+          <Stroke color="#66ff8a3d" thickness="10" cap="ROUND" />
+        </Arc>
+        <Arc centerX="225" centerY="225" width="400" height="400" startAngle="150" endAngle="210">
+          <Stroke color="#664da3ff" thickness="10" cap="ROUND" />
+        </Arc>
+        <Arc centerX="225" centerY="225" width="400" height="400" startAngle="230" endAngle="265">
+          <Stroke color="#333ddc97" thickness="10" cap="ROUND" />
+        </Arc>
+      </PartDraw>
+
+      <!-- steps progress arc: driven by STEP_PERCENT, only when a step goal exists -->
+      <Condition>
+        <Expressions>
+          <Expression name="has_step_goal"><![CDATA[[STEP_GOAL] > 0]]></Expression>
+        </Expressions>
+        <Compare expression="has_step_goal">
+          <PartDraw x="0" y="0" width="450" height="450" name="arc_steps_progress">
+            <Arc centerX="225" centerY="225" width="400" height="400" startAngle="230" endAngle="265">
+              <Stroke color="#ff3ddc97" thickness="10" cap="ROUND" />
+              <Transform target="endAngle" value="230 + (clamp([STEP_PERCENT], 0, 100) / 100) * 35" />
+            </Arc>
+          </PartDraw>
+        </Compare>
+        <Default>
+          <Group x="0" y="0" width="1" height="1" name="arc_steps_none" />
+        </Default>
+      </Condition>
+
+      <!-- Weather: one consolidated area (icon + current temp + today's
+           high/low + condition name). -->
+      <Group x="140" y="93" width="175" height="70" name="weather">
+        <Condition>
+          <Expressions>
+            <Expression name="weather_available"><![CDATA[[WEATHER.IS_AVAILABLE]]]></Expression>
+          </Expressions>
+          <Compare expression="weather_available">
+            <Group x="0" y="0" width="175" height="70" name="weather_ok">
+              <Condition>
+                <Expressions>
+                  <Expression name="is_day"><![CDATA[[WEATHER.IS_DAY]]]></Expression>
+                </Expressions>
+                <Compare expression="is_day">
+                  <PartText x="0" y="0" width="36" height="36" name="w_icon">
+                    <Text>
+                      <BitmapFont family="weather_icons_day" size="38">
+                        <Template><![CDATA[%s]]>
+                          <Parameter expression="[WEATHER.IS_ERROR] ? 0 : ([WEATHER.CONDITION] &lt;= 15 ? [WEATHER.CONDITION] : 0)" />
+                        </Template>
+                      </BitmapFont>
+                    </Text>
+                  </PartText>
+                </Compare>
+                <Default>
+                  <PartText x="0" y="0" width="36" height="36" name="w_icon_night">
+                    <Text>
+                      <BitmapFont family="weather_icons_night" size="38">
+                        <Template><![CDATA[%s]]>
+                          <Parameter expression="[WEATHER.IS_ERROR] ? 0 : ([WEATHER.CONDITION] &lt;= 15 ? [WEATHER.CONDITION] : 0)" />
+                        </Template>
+                      </BitmapFont>
+                    </Text>
+                  </PartText>
+                </Default>
+              </Condition>
+              <PartText x="40" y="0" width="42" height="34" name="w_temp_now">
+                <Text align="START">
+                  <Font family="poppins_medium" size="28" color="#ffffffff">
+                    <Template><![CDATA[%d°]]>
+                      <Parameter expression="[WEATHER.TEMPERATURE]" />
+                    </Template>
+                  </Font>
+                </Text>
+              </PartText>
+              <PartText x="86" y="6" width="88" height="26" name="w_temp_hilo">
+                <Text align="START">
+                  <Font family="poppins_regular" size="17" color="#ff9e9e9e">
+                    <Template><![CDATA[/ %d° %d°]]>
+                      <Parameter expression="[WEATHER.DAY_TEMPERATURE_HIGH]" />
+                      <Parameter expression="[WEATHER.DAY_TEMPERATURE_LOW]" />
+                    </Template>
+                  </Font>
+                </Text>
+              </PartText>
+              <PartText x="0" y="42" width="175" height="24" name="w_condition">
+                <Text align="CENTER">
+                  <Font family="SYNC_TO_DEVICE" size="16" color="#ffb0bec5">
+                    <Template><![CDATA[%s]]>
+                      <Parameter expression="[WEATHER.CONDITION_NAME]" />
+                    </Template>
+                  </Font>
+                </Text>
+              </PartText>
+            </Group>
+          </Compare>
+          <Default>
+            <Group x="0" y="0" width="175" height="70" name="weather_na">
+              <PartText x="0" y="4" width="175" height="34" name="w_na">
+                <Text align="CENTER">
+                  <Font family="poppins_medium" size="28" color="#ff9e9e9e">--°</Font>
+                </Text>
+              </PartText>
+            </Group>
+          </Default>
+        </Condition>
+      </Group>
+
+      <!-- Seconds — to the right of HH:MM, baseline-aligned near y=258 -->
+      <PartText x="370" y="214" width="58" height="44" name="seconds">
+        <Text align="START">
+          <Font family="poppins_medium" size="38" color="#ff89a4d0">
+            <Template><![CDATA[%s]]>
+              <Parameter expression="[SECOND_Z]" />
+            </Template>
+          </Font>
+        </Text>
+      </PartText>
+
+      <!-- Heart rate (9-11 o'clock, upper-left cluster under the pink arc) -->
+      <Group x="0" y="0" width="450" height="450" name="heart_rate">
+        <PartImage x="83" y="108" width="26" height="26" name="hr_icon">
+          <Image resource="ic_heart" />
+        </PartImage>
+        <Condition>
+          <Expressions>
+            <Expression name="hr_valid"><![CDATA[round([HEART_RATE]) >= 1]]></Expression>
+          </Expressions>
+          <Compare expression="hr_valid">
+            <PartText x="57" y="130" width="70" height="32" name="hr_value">
+              <Text align="CENTER">
+                <Font family="poppins_medium" size="26" color="#ffffffff">
+                  <Template><![CDATA[%d]]>
+                    <Parameter expression="round([HEART_RATE])" />
+                  </Template>
+                </Font>
+              </Text>
+            </PartText>
+          </Compare>
+          <Default>
+            <PartText x="57" y="130" width="70" height="32" name="hr_value_na">
+              <Text align="CENTER">
+                <Font family="poppins_medium" size="26" color="#ff9e9e9e">--</Font>
+              </Text>
+            </PartText>
+          </Default>
+        </Condition>
+        <PartText x="57" y="162" width="70" height="16" name="hr_unit">
+          <Text align="CENTER">
+            <Font family="poppins_regular" size="12" color="#ff8a9199">bpm</Font>
+          </Text>
+        </PartText>
+      </Group>
+
+      <!-- Steps (7-9 o'clock, left-lower cluster inside the green arc) -->
+      <PartImage x="82" y="280" width="24" height="24" name="steps_icon">
+        <Image resource="ic_steps" />
+      </PartImage>
+      <PartText x="50" y="306" width="96" height="30" name="steps_value">
+        <Text align="CENTER">
+          <Font family="poppins_medium" size="24" color="#ffffffff">
+            <Template><![CDATA[%,d]]>
+              <Parameter expression="[STEP_COUNT]" />
+            </Template>
+          </Font>
+        </Text>
+      </PartText>
+      <PartText x="52" y="332" width="96" height="14" name="steps_goal">
+        <Text align="CENTER">
+          <Font family="poppins_regular" size="11" color="#ff8a9199">
+            <Template><![CDATA[/ %,d]]>
+              <Parameter expression="[STEP_GOAL]" />
+            </Template>
+          </Font>
+        </Text>
+      </PartText>
+    </Group>
+
+    <!-- ============================================================ -->
+    <!-- Editable complication slots                                  -->
+    <!-- ============================================================ -->
+
+    <!-- Next alarm (1-3 o'clock; user assigns the clock app's alarm complication) -->
+    <ComplicationSlot x="300" y="92" width="110" height="80" slotId="10"
+        displayName="slot_alarm" isCustomizable="TRUE"
+        supportedTypes="SHORT_TEXT MONOCHROMATIC_IMAGE EMPTY">
+      <BoundingBox x="0" y="0" width="110" height="80" outlinePadding="2.0" />
+      <DefaultProviderPolicy defaultSystemProvider="EMPTY" defaultSystemProviderType="EMPTY" />
+      <Variant mode="AMBIENT" target="alpha" value="0" />
+
+      <Complication type="SHORT_TEXT">
+        <PartImage x="42" y="8" width="26" height="26" name="alarm_icon_st">
+          <Image resource="ic_alarm" />
+        </PartImage>
+        <Condition>
+          <Expressions>
+            <Expression name="alarm_has_text"><![CDATA[[COMPLICATION.TEXT] != null]]></Expression>
+          </Expressions>
+          <Compare expression="alarm_has_text">
+            <PartText x="0" y="36" width="110" height="28" name="alarm_text">
+              <Text align="CENTER" ellipsis="TRUE">
+                <Font family="poppins_medium" size="24" color="#ffffffff">
+                  <Template><![CDATA[%s]]>
+                    <Parameter expression="[COMPLICATION.TEXT]" />
+                  </Template>
+                </Font>
+              </Text>
+            </PartText>
+          </Compare>
+          <Default>
+            <PartText x="0" y="36" width="110" height="28" name="alarm_none">
+              <Text align="CENTER">
+                <Font family="poppins_medium" size="24" color="#ff9e9e9e">なし</Font>
+              </Text>
+            </PartText>
+          </Default>
+        </Condition>
+        <PartText x="0" y="62" width="110" height="16" name="alarm_label_st">
+          <Text align="CENTER">
+            <Font family="SYNC_TO_DEVICE" size="12" color="#ff8a9199">アラーム</Font>
+          </Text>
+        </PartText>
+      </Complication>
+
+      <Complication type="MONOCHROMATIC_IMAGE">
+        <PartImage x="41" y="12" width="28" height="28" name="alarm_img">
+          <Image resource="[COMPLICATION.MONOCHROMATIC_IMAGE]" />
+        </PartImage>
+        <PartText x="0" y="62" width="110" height="16" name="alarm_label_img">
+          <Text align="CENTER">
+            <Font family="SYNC_TO_DEVICE" size="12" color="#ff8a9199">アラーム</Font>
+          </Text>
+        </PartText>
+      </Complication>
+
+      <Complication type="EMPTY">
+        <PartImage x="42" y="8" width="26" height="26" name="alarm_icon_empty">
+          <Image resource="ic_alarm" />
+        </PartImage>
+        <PartText x="0" y="36" width="110" height="28" name="alarm_empty">
+          <Text align="CENTER">
+            <Font family="poppins_medium" size="24" color="#ff9e9e9e">--</Font>
+          </Text>
+        </PartText>
+        <PartText x="0" y="62" width="110" height="16" name="alarm_label_empty">
+          <Text align="CENTER">
+            <Font family="SYNC_TO_DEVICE" size="12" color="#ff8a9199">アラーム</Font>
+          </Text>
+        </PartText>
+      </Complication>
+    </ComplicationSlot>
+
+    <!-- Distance (5-7 o'clock, bottom; user assigns a distance complication) -->
+    <ComplicationSlot x="173" y="300" width="104" height="72" slotId="11"
+        displayName="slot_distance" isCustomizable="TRUE"
+        supportedTypes="GOAL_PROGRESS SHORT_TEXT MONOCHROMATIC_IMAGE EMPTY">
+      <BoundingBox x="0" y="0" width="104" height="72" outlinePadding="2.0" />
+      <DefaultProviderPolicy defaultSystemProvider="EMPTY" defaultSystemProviderType="EMPTY" />
+      <Variant mode="AMBIENT" target="alpha" value="0" />
+
+      <Complication type="GOAL_PROGRESS">
+        <PartImage x="40" y="4" width="24" height="24" name="dist_icon">
+          <Image resource="ic_distance" />
+        </PartImage>
+        <Condition>
+          <Expressions>
+            <Expression name="dist_has_text"><![CDATA[[COMPLICATION.TEXT] != null]]></Expression>
+          </Expressions>
+          <Compare expression="dist_has_text">
+            <PartText x="0" y="32" width="104" height="30" name="dist_text">
+              <Text align="CENTER" ellipsis="TRUE">
+                <Font family="poppins_medium" size="24" color="#ffffffff">
+                  <Template><![CDATA[%s]]>
+                    <Parameter expression="[COMPLICATION.TEXT]" />
+                  </Template>
+                </Font>
+              </Text>
+            </PartText>
+          </Compare>
+          <Default>
+            <PartText x="0" y="32" width="104" height="30" name="dist_text_na">
+              <Text align="CENTER">
+                <Font family="poppins_medium" size="24" color="#ff9e9e9e">--</Font>
+              </Text>
+            </PartText>
+          </Default>
+        </Condition>
+      </Complication>
+
+      <Complication type="SHORT_TEXT">
+        <PartImage x="40" y="4" width="24" height="24" name="dist_icon_st">
+          <Image resource="ic_distance" />
+        </PartImage>
+        <Condition>
+          <Expressions>
+            <Expression name="dist_st_text"><![CDATA[[COMPLICATION.TEXT] != null]]></Expression>
+          </Expressions>
+          <Compare expression="dist_st_text">
+            <PartText x="0" y="32" width="104" height="30" name="dist_st_val">
+              <Text align="CENTER" ellipsis="TRUE">
+                <Font family="poppins_medium" size="24" color="#ffffffff">
+                  <Template><![CDATA[%s]]>
+                    <Parameter expression="[COMPLICATION.TEXT]" />
+                  </Template>
+                </Font>
+              </Text>
+            </PartText>
+          </Compare>
+          <Default>
+            <PartText x="0" y="32" width="104" height="30" name="dist_st_na">
+              <Text align="CENTER">
+                <Font family="poppins_medium" size="24" color="#ff9e9e9e">--</Font>
+              </Text>
+            </PartText>
+          </Default>
+        </Condition>
+      </Complication>
+
+      <Complication type="MONOCHROMATIC_IMAGE">
+        <PartImage x="38" y="12" width="28" height="28" name="dist_img">
+          <Image resource="[COMPLICATION.MONOCHROMATIC_IMAGE]" />
+        </PartImage>
+      </Complication>
+
+      <Complication type="EMPTY">
+        <PartImage x="40" y="4" width="24" height="24" name="dist_icon_empty">
+          <Image resource="ic_distance" />
+        </PartImage>
+        <PartText x="0" y="32" width="104" height="30" name="dist_empty">
+          <Text align="CENTER">
+            <Font family="poppins_medium" size="24" color="#ff9e9e9e">--</Font>
+          </Text>
+        </PartText>
+      </Complication>
+    </ComplicationSlot>
+
+    <!-- Calories burned (3-5 o'clock, right-lower; user assigns a calorie complication) -->
+    <ComplicationSlot x="272" y="278" width="120" height="68" slotId="12"
+        displayName="slot_calories" isCustomizable="TRUE"
+        supportedTypes="GOAL_PROGRESS SHORT_TEXT MONOCHROMATIC_IMAGE EMPTY">
+      <BoundingBox x="0" y="0" width="120" height="68" outlinePadding="2.0" />
+      <DefaultProviderPolicy defaultSystemProvider="EMPTY" defaultSystemProviderType="EMPTY" />
+      <Variant mode="AMBIENT" target="alpha" value="0" />
+
+      <Complication type="GOAL_PROGRESS">
+        <PartImage x="48" y="2" width="24" height="24" name="cal_icon">
+          <Image resource="ic_calories" />
+        </PartImage>
+        <Condition>
+          <Expressions>
+            <Expression name="cal_has_text"><![CDATA[[COMPLICATION.TEXT] != null]]></Expression>
+          </Expressions>
+          <Compare expression="cal_has_text">
+            <PartText x="0" y="30" width="120" height="30" name="cal_text">
+              <Text align="CENTER" ellipsis="TRUE">
+                <Font family="poppins_medium" size="24" color="#ffffffff">
+                  <Template><![CDATA[%s]]>
+                    <Parameter expression="[COMPLICATION.TEXT]" />
+                  </Template>
+                </Font>
+              </Text>
+            </PartText>
+          </Compare>
+          <Default>
+            <PartText x="0" y="30" width="120" height="30" name="cal_text_na">
+              <Text align="CENTER">
+                <Font family="poppins_medium" size="24" color="#ff9e9e9e">--</Font>
+              </Text>
+            </PartText>
+          </Default>
+        </Condition>
+      </Complication>
+
+      <Complication type="SHORT_TEXT">
+        <PartImage x="48" y="2" width="24" height="24" name="cal_icon_st">
+          <Image resource="ic_calories" />
+        </PartImage>
+        <Condition>
+          <Expressions>
+            <Expression name="cal_st_text"><![CDATA[[COMPLICATION.TEXT] != null]]></Expression>
+          </Expressions>
+          <Compare expression="cal_st_text">
+            <PartText x="0" y="30" width="120" height="30" name="cal_st_val">
+              <Text align="CENTER" ellipsis="TRUE">
+                <Font family="poppins_medium" size="24" color="#ffffffff">
+                  <Template><![CDATA[%s]]>
+                    <Parameter expression="[COMPLICATION.TEXT]" />
+                  </Template>
+                </Font>
+              </Text>
+            </PartText>
+          </Compare>
+          <Default>
+            <PartText x="0" y="30" width="120" height="30" name="cal_st_na">
+              <Text align="CENTER">
+                <Font family="poppins_medium" size="24" color="#ff9e9e9e">--</Font>
+              </Text>
+            </PartText>
+          </Default>
+        </Condition>
+      </Complication>
+
+      <Complication type="MONOCHROMATIC_IMAGE">
+        <PartImage x="46" y="10" width="28" height="28" name="cal_img">
+          <Image resource="[COMPLICATION.MONOCHROMATIC_IMAGE]" />
+        </PartImage>
+      </Complication>
+
+      <Complication type="EMPTY">
+        <PartImage x="48" y="2" width="24" height="24" name="cal_icon_empty">
+          <Image resource="ic_calories" />
+        </PartImage>
+        <PartText x="0" y="30" width="120" height="30" name="cal_empty">
+          <Text align="CENTER">
+            <Font family="poppins_medium" size="24" color="#ff9e9e9e">--</Font>
+          </Text>
+        </PartText>
+      </Complication>
+    </ComplicationSlot>
+
+  </Scene>
+</WatchFace>

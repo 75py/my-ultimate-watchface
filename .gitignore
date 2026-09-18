@@ -1,0 +1,25 @@
+# Build output
+build/
+**/build/
+outputs/
+*.apk
+*.aab
+*.ap_
+*.dex
+local.properties
+
+# Signing materials — never commit these
+keystore.properties
+*.keystore
+*.jks
+*.pem
+
+# IDE
+.idea/
+*.iml
+.gradle/
+.cxx/
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="watch_face_name">My Ultimate Watch Face</string>
+
+    <!-- Complication slot display names shown in the watch face editor -->
+    <string name="slot_alarm">アラーム</string>
+    <string name="slot_distance">距離</string>
+    <string name="slot_calories">消費カロリー</string>
+
+    <!-- Fallback strings -->
+    <string name="no_data">--</string>
+    <string name="no_alarm">なし</string>
+</resources>
