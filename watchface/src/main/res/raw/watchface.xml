@@ -2,20 +2,22 @@
 <!--
   My Ultimate Watch Face — Watch Face Format v2 (Wear OS 5 / API 34+)
 
-  Layout on a 450x450 virtual canvas (scaled to the physical display):
-    - top center    : date (M月D日（曜）)
-    - below date    : weather block (icon + current temp + today high/low + condition name)
-    - center        : large HH:MM at the geometric center, fixed position,
-                      per-digit boxes so changing digits never shift the layout
-    - right of MM   : small seconds (interactive mode only)
-    - upper left    : heart rate (9-11 o'clock, pink arc on the rim)
-    - upper right   : next alarm (1-3 o'clock, indigo arc, editable complication slot)
-    - left-lower    : steps (7-9 o'clock, green arc driven by STEP_PERCENT)
-    - bottom        : distance (5-7 o'clock, blue arc, editable complication slot)
-    - right-lower   : calories burned (3-5 o'clock, orange arc, editable slot)
-  WFF expressions cannot read complication values outside their slot, so only
-  the steps arc is progress-linked; the other arcs are fixed accent tracks.
+  Monochrome mint-on-black design (see sample_v2.png), 450x450 virtual canvas:
+    - top center   : date  "9月15日 (火)"
+    - below date   : weather block (mono icon + current temp + "/ low" + condition name)
+    - upper middle : large HH:MM, per-digit boxes so changing digits never shift,
+                     small seconds to the right (interactive mode only)
+    - lower half   : five ring gauges, icon sitting in the gap at the bottom of each ring
+        row 1: steps (STEP_PERCENT ring) | distance slot | calories slot
+        row 2: heart rate                | next-alarm slot
+      Rings are drawn as a dim 310° track plus a bright progress arc. Progress is
+      only shown where a real value exists: steps ([STEP_PERCENT]) and GOAL_PROGRESS /
+      RANGED_VALUE complications (read inside their own slot). Heart rate, alarm and
+      SHORT_TEXT providers get a fully-lit ring; an EMPTY slot shows only the dim track.
   Ambient (AOD): only the date and HH:MM remain, dimmed, at identical positions.
+
+  Palette: mint #cbfdf1 (primary), track #2f473f, date #e5ebe8,
+           secondary text #9ba5b4 / #b2bdcd.
 -->
 <WatchFace width="450" height="450" clipShape="CIRCLE">
 
@@ -23,8 +25,8 @@
   <Metadata key="PREVIEW_TIME" value="10:08:36" />
   <Metadata key="STEP_GOAL" value="10000" />
 
-  <!-- Weather condition icons, selected by the [WEATHER.CONDITION] enum value
-       rendered through a BitmapFont (same technique as the official Weather sample). -->
+  <!-- Weather condition icons (monochrome mint, Material Symbols), selected by the
+       [WEATHER.CONDITION] enum value rendered through a BitmapFont. -->
   <BitmapFonts>
     <BitmapFont name="weather_icons_day">
       <Character name="0" resource="w_unknown" width="96" height="96" />
@@ -73,13 +75,13 @@
     <Group x="0" y="0" width="450" height="450" name="ambient_kept">
       <Variant mode="AMBIENT" target="alpha" value="150" />
 
-      <!-- Date: 9月15日（火） — tap opens the calendar app -->
-      <PartText x="100" y="56" width="250" height="34" name="date">
+      <!-- Date: 9月15日 (火) — tap opens the calendar app -->
+      <PartText x="75" y="22" width="300" height="32" name="date">
         <Launch target="CALENDAR" />
         <Localization calendar="GREGORIAN" timeZone="SYNC_TO_DEVICE" />
         <Text align="CENTER">
-          <Font family="poppins_medium" size="26" color="#ffffffff">
-            <Template><![CDATA[%s月%s日（%s）]]>
+          <Font family="SYNC_TO_DEVICE" size="22" color="#ffe5ebe8">
+            <Template><![CDATA[%s月%s日 (%s)]]>
               <Parameter expression="[MONTH]" />
               <Parameter expression="[DAY]" />
               <Parameter expression="[DAY_OF_WEEK_S]" />
@@ -88,28 +90,28 @@
         </Text>
       </PartText>
 
-      <!-- HH:MM — geometric center of the 450x450 canvas is (225,225);
-           the clock group is centered on it horizontally. -->
-      <Group x="83" y="168" width="284" height="120" name="clock">
-        <DigitalClock x="0" y="0" width="284" height="120">
+      <!-- HH:MM — centred on x=214 (the seconds sit to its right), digits centred
+           on y=182. Per-digit boxes keep every glyph in place while the value changes. -->
+      <Group x="104" y="132" width="220" height="100" name="clock">
+        <DigitalClock x="0" y="0" width="220" height="100">
           <Localization calendar="GREGORIAN" timeZone="SYNC_TO_DEVICE" />
-          <TimeText format="hh_10" hourFormat="24" x="0" y="0" width="64" height="120" align="CENTER">
-            <Font family="poppins_light" size="110" color="#ffe9faf7" />
+          <TimeText format="hh_10" hourFormat="24" x="0" y="0" width="48" height="100" align="CENTER">
+            <Font family="poppins_regular" size="82" color="#ffcbfdf1" />
           </TimeText>
-          <TimeText format="hh_1" hourFormat="24" x="64" y="0" width="64" height="120" align="CENTER">
-            <Font family="poppins_light" size="110" color="#ffe9faf7" />
+          <TimeText format="hh_1" hourFormat="24" x="48" y="0" width="48" height="100" align="CENTER">
+            <Font family="poppins_regular" size="82" color="#ffcbfdf1" />
           </TimeText>
-          <TimeText format="mm_10" hourFormat="24" x="156" y="0" width="64" height="120" align="CENTER">
-            <Font family="poppins_light" size="110" color="#ffe9faf7" />
+          <TimeText format="mm_10" hourFormat="24" x="124" y="0" width="48" height="100" align="CENTER">
+            <Font family="poppins_regular" size="82" color="#ffcbfdf1" />
           </TimeText>
-          <TimeText format="mm_1" hourFormat="24" x="220" y="0" width="64" height="120" align="CENTER">
-            <Font family="poppins_light" size="110" color="#ffe9faf7" />
+          <TimeText format="mm_1" hourFormat="24" x="172" y="0" width="48" height="100" align="CENTER">
+            <Font family="poppins_regular" size="82" color="#ffcbfdf1" />
           </TimeText>
         </DigitalClock>
         <!-- static separator: never moves -->
-        <PartText x="128" y="0" width="28" height="120" name="colon">
+        <PartText x="96" y="0" width="28" height="100" name="colon">
           <Text align="CENTER">
-            <Font family="poppins_light" size="110" color="#ffe9faf7">:</Font>
+            <Font family="poppins_regular" size="82" color="#ffcbfdf1">:</Font>
           </Text>
         </PartText>
       </Group>
@@ -121,79 +123,23 @@
     <Group x="0" y="0" width="450" height="450" name="interactive_only" alpha="255">
       <Variant mode="AMBIENT" target="alpha" value="0" />
 
-      <!-- rim tick marks every 30 degrees -->
-      <PartDraw x="0" y="0" width="450" height="450" name="ticks">
-        <Line startX="225.0" startY="9.0" endX="225.0" endY="21.0"><Stroke color="#ff3a4046" thickness="2.5" cap="ROUND" /></Line>
-        <Line startX="333.0" startY="37.9" endX="327.0" endY="48.3"><Stroke color="#ff3a4046" thickness="2.5" cap="ROUND" /></Line>
-        <Line startX="412.1" startY="117.0" endX="401.7" endY="123.0"><Stroke color="#ff3a4046" thickness="2.5" cap="ROUND" /></Line>
-        <Line startX="441.0" startY="225.0" endX="429.0" endY="225.0"><Stroke color="#ff3a4046" thickness="2.5" cap="ROUND" /></Line>
-        <Line startX="412.1" startY="333.0" endX="401.7" endY="327.0"><Stroke color="#ff3a4046" thickness="2.5" cap="ROUND" /></Line>
-        <Line startX="333.0" startY="412.1" endX="327.0" endY="401.7"><Stroke color="#ff3a4046" thickness="2.5" cap="ROUND" /></Line>
-        <Line startX="225.0" startY="441.0" endX="225.0" endY="429.0"><Stroke color="#ff3a4046" thickness="2.5" cap="ROUND" /></Line>
-        <Line startX="117.0" startY="412.1" endX="123.0" endY="401.7"><Stroke color="#ff3a4046" thickness="2.5" cap="ROUND" /></Line>
-        <Line startX="37.9" startY="333.0" endX="48.3" endY="327.0"><Stroke color="#ff3a4046" thickness="2.5" cap="ROUND" /></Line>
-        <Line startX="9.0" startY="225.0" endX="21.0" endY="225.0"><Stroke color="#ff3a4046" thickness="2.5" cap="ROUND" /></Line>
-        <Line startX="37.9" startY="117.0" endX="48.3" endY="123.0"><Stroke color="#ff3a4046" thickness="2.5" cap="ROUND" /></Line>
-        <Line startX="117.0" startY="37.9" endX="123.0" endY="48.3"><Stroke color="#ff3a4046" thickness="2.5" cap="ROUND" /></Line>
-      </PartDraw>
-
-      <!-- perimeter accent arcs, matching each item's clock position on the rim
-           (ring radius 200, thickness 10): HR pink upper-left, alarm indigo
-           upper-right, calories orange right, distance blue bottom, steps green left -->
-      <PartDraw x="0" y="0" width="450" height="450" name="arc_tracks">
-        <Arc centerX="225" centerY="225" width="400" height="400" startAngle="300" endAngle="335">
-          <Stroke color="#66ff5a7e" thickness="10" cap="ROUND" />
-        </Arc>
-        <Arc centerX="225" centerY="225" width="400" height="400" startAngle="25" endAngle="60">
-          <Stroke color="#668fa8ff" thickness="10" cap="ROUND" />
-        </Arc>
-        <Arc centerX="225" centerY="225" width="400" height="400" startAngle="85" endAngle="135">
-          <Stroke color="#66ff8a3d" thickness="10" cap="ROUND" />
-        </Arc>
-        <Arc centerX="225" centerY="225" width="400" height="400" startAngle="150" endAngle="210">
-          <Stroke color="#664da3ff" thickness="10" cap="ROUND" />
-        </Arc>
-        <Arc centerX="225" centerY="225" width="400" height="400" startAngle="230" endAngle="265">
-          <Stroke color="#333ddc97" thickness="10" cap="ROUND" />
-        </Arc>
-      </PartDraw>
-
-      <!-- steps progress arc: driven by STEP_PERCENT, only when a step goal exists -->
-      <Condition>
-        <Expressions>
-          <Expression name="has_step_goal"><![CDATA[[STEP_GOAL] > 0]]></Expression>
-        </Expressions>
-        <Compare expression="has_step_goal">
-          <PartDraw x="0" y="0" width="450" height="450" name="arc_steps_progress">
-            <Arc centerX="225" centerY="225" width="400" height="400" startAngle="230" endAngle="265">
-              <Stroke color="#ff3ddc97" thickness="10" cap="ROUND" />
-              <Transform target="endAngle" value="230 + (clamp([STEP_PERCENT], 0, 100) / 100) * 35" />
-            </Arc>
-          </PartDraw>
-        </Compare>
-        <Default>
-          <Group x="0" y="0" width="1" height="1" name="arc_steps_none" />
-        </Default>
-      </Condition>
-
-      <!-- Weather: one consolidated area (icon + current temp + today's
-           high/low + condition name). -->
-      <Group x="140" y="93" width="175" height="70" name="weather">
+      <!-- Weather: mono icon + current temp + "/ low" + condition name. -->
+      <Group x="105" y="45" width="240" height="88" name="weather">
         <Launch target="com.google.android.wearable.weather" />
         <Condition>
           <Expressions>
             <Expression name="weather_available"><![CDATA[[WEATHER.IS_AVAILABLE]]]></Expression>
           </Expressions>
           <Compare expression="weather_available">
-            <Group x="0" y="0" width="175" height="70" name="weather_ok">
+            <Group x="0" y="0" width="240" height="88" name="weather_ok">
               <Condition>
                 <Expressions>
                   <Expression name="is_day"><![CDATA[[WEATHER.IS_DAY]]]></Expression>
                 </Expressions>
                 <Compare expression="is_day">
-                  <PartText x="0" y="0" width="36" height="36" name="w_icon">
-                    <Text>
-                      <BitmapFont family="weather_icons_day" size="38">
+                  <PartText x="15" y="0" width="72" height="72" name="w_icon">
+                    <Text align="CENTER">
+                      <BitmapFont family="weather_icons_day" size="72">
                         <Template><![CDATA[%s]]>
                           <Parameter expression="[WEATHER.IS_ERROR] ? 0 : ([WEATHER.CONDITION] &lt;= 15 ? [WEATHER.CONDITION] : 0)" />
                         </Template>
@@ -202,9 +148,9 @@
                   </PartText>
                 </Compare>
                 <Default>
-                  <PartText x="0" y="0" width="36" height="36" name="w_icon_night">
-                    <Text>
-                      <BitmapFont family="weather_icons_night" size="38">
+                  <PartText x="15" y="0" width="72" height="72" name="w_icon_night">
+                    <Text align="CENTER">
+                      <BitmapFont family="weather_icons_night" size="72">
                         <Template><![CDATA[%s]]>
                           <Parameter expression="[WEATHER.IS_ERROR] ? 0 : ([WEATHER.CONDITION] &lt;= 15 ? [WEATHER.CONDITION] : 0)" />
                         </Template>
@@ -213,28 +159,29 @@
                   </PartText>
                 </Default>
               </Condition>
-              <PartText x="40" y="0" width="42" height="34" name="w_temp_now">
+              <!-- current temperature, large -->
+              <PartText x="95" y="6" width="84" height="66" name="w_temp_now">
                 <Text align="START">
-                  <Font family="poppins_medium" size="28" color="#ffffffff">
+                  <Font family="poppins_regular" size="54" color="#ffcbfdf1">
                     <Template><![CDATA[%d°]]>
                       <Parameter expression="[WEATHER.TEMPERATURE]" />
                     </Template>
                   </Font>
                 </Text>
               </PartText>
-              <PartText x="86" y="6" width="88" height="26" name="w_temp_hilo">
+              <!-- today's low, small and muted, baseline-aligned with the big number -->
+              <PartText x="176" y="27" width="64" height="36" name="w_temp_low">
                 <Text align="START">
-                  <Font family="poppins_regular" size="17" color="#ff9e9e9e">
-                    <Template><![CDATA[/ %d° %d°]]>
-                      <Parameter expression="[WEATHER.DAY_TEMPERATURE_HIGH]" />
+                  <Font family="poppins_regular" size="28" color="#ff9ba5b4">
+                    <Template><![CDATA[/ %d°]]>
                       <Parameter expression="[WEATHER.DAY_TEMPERATURE_LOW]" />
                     </Template>
                   </Font>
                 </Text>
               </PartText>
-              <PartText x="0" y="42" width="175" height="24" name="w_condition">
-                <Text align="CENTER">
-                  <Font family="SYNC_TO_DEVICE" size="16" color="#ffb0bec5">
+              <PartText x="0" y="64" width="240" height="24" name="w_condition">
+                <Text align="CENTER" ellipsis="TRUE">
+                  <Font family="SYNC_TO_DEVICE" size="17" color="#ffb2bdcd">
                     <Template><![CDATA[%s]]>
                       <Parameter expression="[WEATHER.CONDITION_NAME]" />
                     </Template>
@@ -244,10 +191,15 @@
             </Group>
           </Compare>
           <Default>
-            <Group x="0" y="0" width="175" height="70" name="weather_na">
-              <PartText x="0" y="4" width="175" height="34" name="w_na">
+            <Group x="0" y="0" width="240" height="88" name="weather_na">
+              <PartText x="15" y="0" width="72" height="72" name="w_icon_na">
                 <Text align="CENTER">
-                  <Font family="poppins_medium" size="28" color="#ff9e9e9e">--°</Font>
+                  <BitmapFont family="weather_icons_day" size="72">0</BitmapFont>
+                </Text>
+              </PartText>
+              <PartText x="95" y="6" width="84" height="66" name="w_na">
+                <Text align="START">
+                  <Font family="poppins_regular" size="54" color="#ff9ba5b4">--°</Font>
                 </Text>
               </PartText>
             </Group>
@@ -255,10 +207,10 @@
         </Condition>
       </Group>
 
-      <!-- Seconds — to the right of HH:MM, baseline-aligned near y=258 -->
-      <PartText x="370" y="214" width="58" height="44" name="seconds">
+      <!-- Seconds — right of HH:MM, bottom-aligned with the big digits -->
+      <PartText x="330" y="180" width="60" height="40" name="seconds">
         <Text align="START">
-          <Font family="poppins_medium" size="38" color="#ff89a4d0">
+          <Font family="poppins_regular" size="34" color="#ffcbfdf1">
             <Template><![CDATA[%s]]>
               <Parameter expression="[SECOND_Z]" />
             </Template>
@@ -266,21 +218,85 @@
         </Text>
       </PartText>
 
-      <!-- Heart rate (9-11 o'clock, upper-left cluster under the pink arc) -->
-      <Group x="0" y="0" width="450" height="450" name="heart_rate">
-        <PartImage x="83" y="108" width="26" height="26" name="hr_icon">
-          <Launch target="HEALTH_HEART_RATE" />
-          <Image resource="ic_heart" />
+      <!-- ============================================================ -->
+      <!-- Row 1, left: steps ring (progress = STEP_PERCENT)            -->
+      <!-- ring centre (124,283), radius 33, stroke 5, 310° track       -->
+      <!-- ============================================================ -->
+      <Group x="82" y="241" width="84" height="86" name="steps">
+        <Launch target="com.fitbit.FitbitMobile" />
+        <PartDraw x="0" y="0" width="84" height="84" name="steps_track">
+          <Arc centerX="42" centerY="42" width="66" height="66" startAngle="-155" endAngle="155">
+            <Stroke color="#ff2f473f" thickness="5" cap="ROUND" />
+          </Arc>
+        </PartDraw>
+        <Condition>
+          <Expressions>
+            <Expression name="has_step_goal"><![CDATA[[STEP_GOAL] > 0]]></Expression>
+          </Expressions>
+          <Compare expression="has_step_goal">
+            <PartDraw x="0" y="0" width="84" height="84" name="steps_progress">
+              <Arc centerX="42" centerY="42" width="66" height="66" startAngle="-155" endAngle="-155">
+                <Stroke color="#ffcbfdf1" thickness="5" cap="ROUND" />
+                <Transform target="endAngle" value="-155 + (clamp([STEP_PERCENT], 0, 100) / 100) * 310" />
+              </Arc>
+            </PartDraw>
+          </Compare>
+          <Default>
+            <Group x="0" y="0" width="1" height="1" name="steps_progress_none" />
+          </Default>
+        </Condition>
+        <!-- value: shrink once it reaches five digits so it stays inside the ring -->
+        <Condition>
+          <Expressions>
+            <Expression name="steps_5digits"><![CDATA[[STEP_COUNT] >= 10000]]></Expression>
+          </Expressions>
+          <Compare expression="steps_5digits">
+            <PartText x="0" y="26" width="84" height="32" name="steps_value_5">
+              <Text align="CENTER">
+                <Font family="poppins_regular" size="20" color="#ffcbfdf1">
+                  <Template><![CDATA[%,d]]>
+                    <Parameter expression="[STEP_COUNT]" />
+                  </Template>
+                </Font>
+              </Text>
+            </PartText>
+          </Compare>
+          <Default>
+            <PartText x="0" y="26" width="84" height="32" name="steps_value">
+              <Text align="CENTER">
+                <Font family="poppins_regular" size="24" color="#ffcbfdf1">
+                  <Template><![CDATA[%,d]]>
+                    <Parameter expression="[STEP_COUNT]" />
+                  </Template>
+                </Font>
+              </Text>
+            </PartText>
+          </Default>
+        </Condition>
+        <PartImage x="28" y="56" width="28" height="28" name="steps_icon">
+          <Image resource="ic_steps" />
         </PartImage>
+      </Group>
+
+      <!-- ============================================================ -->
+      <!-- Row 2, left: heart-rate ring (fully lit; no goal exists)     -->
+      <!-- ring centre (176,374), radius 28, stroke 5                   -->
+      <!-- ============================================================ -->
+      <Group x="140" y="338" width="72" height="78" name="heart_rate">
+        <Launch target="HEALTH_HEART_RATE" />
+        <PartDraw x="0" y="0" width="72" height="72" name="hr_ring">
+          <Arc centerX="36" centerY="36" width="56" height="56" startAngle="-155" endAngle="155">
+            <Stroke color="#ffcbfdf1" thickness="5" cap="ROUND" />
+          </Arc>
+        </PartDraw>
         <Condition>
           <Expressions>
             <Expression name="hr_valid"><![CDATA[round([HEART_RATE]) >= 1]]></Expression>
           </Expressions>
           <Compare expression="hr_valid">
-            <PartText x="57" y="130" width="70" height="32" name="hr_value">
-              <Launch target="HEALTH_HEART_RATE" />
+            <PartText x="0" y="18" width="72" height="32" name="hr_value">
               <Text align="CENTER">
-                <Font family="poppins_medium" size="26" color="#ffffffff">
+                <Font family="poppins_regular" size="24" color="#ffcbfdf1">
                   <Template><![CDATA[%d]]>
                     <Parameter expression="round([HEART_RATE])" />
                   </Template>
@@ -289,147 +305,51 @@
             </PartText>
           </Compare>
           <Default>
-            <PartText x="57" y="130" width="70" height="32" name="hr_value_na">
-              <Launch target="HEALTH_HEART_RATE" />
+            <PartText x="0" y="18" width="72" height="32" name="hr_value_na">
               <Text align="CENTER">
-                <Font family="poppins_medium" size="26" color="#ff9e9e9e">--</Font>
+                <Font family="poppins_regular" size="24" color="#ff9ba5b4">--</Font>
               </Text>
             </PartText>
           </Default>
         </Condition>
-        <PartText x="57" y="162" width="70" height="16" name="hr_unit">
-          <Launch target="HEALTH_HEART_RATE" />
-          <Text align="CENTER">
-            <Font family="poppins_regular" size="12" color="#ff8a9199">bpm</Font>
-          </Text>
-        </PartText>
+        <PartImage x="24" y="48" width="24" height="24" name="hr_icon">
+          <Image resource="ic_heart" />
+        </PartImage>
       </Group>
-
-      <!-- Steps (7-9 o'clock, left-lower cluster inside the green arc);
-           tapping any element opens the health app (Fitbit on Pixel Watch) -->
-      <PartImage x="82" y="280" width="24" height="24" name="steps_icon">
-        <Launch target="com.fitbit.FitbitMobile" />
-        <Image resource="ic_steps" />
-      </PartImage>
-      <PartText x="50" y="306" width="96" height="30" name="steps_value">
-        <Launch target="com.fitbit.FitbitMobile" />
-        <Text align="CENTER">
-          <Font family="poppins_medium" size="24" color="#ffffffff">
-            <Template><![CDATA[%,d]]>
-              <Parameter expression="[STEP_COUNT]" />
-            </Template>
-          </Font>
-        </Text>
-      </PartText>
-      <PartText x="52" y="332" width="96" height="14" name="steps_goal">
-        <Launch target="com.fitbit.FitbitMobile" />
-        <Text align="CENTER">
-          <Font family="poppins_regular" size="11" color="#ff8a9199">
-            <Template><![CDATA[/ %,d]]>
-              <Parameter expression="[STEP_GOAL]" />
-            </Template>
-          </Font>
-        </Text>
-      </PartText>
     </Group>
 
     <!-- ============================================================ -->
-    <!-- Editable complication slots                                  -->
+    <!-- Editable complication slots (each draws its own ring)        -->
     <!-- ============================================================ -->
 
-    <!-- Next alarm (1-3 o'clock; user assigns the clock app's alarm complication) -->
-    <ComplicationSlot x="300" y="92" width="110" height="80" slotId="10"
-        displayName="slot_alarm" isCustomizable="TRUE"
-        supportedTypes="SHORT_TEXT MONOCHROMATIC_IMAGE EMPTY">
-      <BoundingBox x="0" y="0" width="110" height="80" outlinePadding="2.0" />
-      <DefaultProviderPolicy defaultSystemProvider="EMPTY" defaultSystemProviderType="EMPTY" />
-      <Variant mode="AMBIENT" target="alpha" value="0" />
-
-      <Complication type="SHORT_TEXT">
-        <PartImage x="42" y="8" width="26" height="26" name="alarm_icon_st">
-          <Image resource="ic_alarm" />
-        </PartImage>
-        <Condition>
-          <Expressions>
-            <Expression name="alarm_has_text"><![CDATA[[COMPLICATION.TEXT] != null]]></Expression>
-          </Expressions>
-          <Compare expression="alarm_has_text">
-            <PartText x="0" y="36" width="110" height="28" name="alarm_text">
-              <Text align="CENTER" ellipsis="TRUE">
-                <Font family="poppins_medium" size="24" color="#ffffffff">
-                  <Template><![CDATA[%s]]>
-                    <Parameter expression="[COMPLICATION.TEXT]" />
-                  </Template>
-                </Font>
-              </Text>
-            </PartText>
-          </Compare>
-          <Default>
-            <PartText x="0" y="36" width="110" height="28" name="alarm_none">
-              <Text align="CENTER">
-                <Font family="poppins_medium" size="24" color="#ff9e9e9e">なし</Font>
-              </Text>
-            </PartText>
-          </Default>
-        </Condition>
-        <PartText x="0" y="62" width="110" height="16" name="alarm_label_st">
-          <Text align="CENTER">
-            <Font family="SYNC_TO_DEVICE" size="12" color="#ff8a9199">アラーム</Font>
-          </Text>
-        </PartText>
-      </Complication>
-
-      <Complication type="MONOCHROMATIC_IMAGE">
-        <PartImage x="41" y="12" width="28" height="28" name="alarm_img">
-          <Image resource="[COMPLICATION.MONOCHROMATIC_IMAGE]" />
-        </PartImage>
-        <PartText x="0" y="62" width="110" height="16" name="alarm_label_img">
-          <Text align="CENTER">
-            <Font family="SYNC_TO_DEVICE" size="12" color="#ff8a9199">アラーム</Font>
-          </Text>
-        </PartText>
-      </Complication>
-
-      <Complication type="EMPTY">
-        <PartImage x="42" y="8" width="26" height="26" name="alarm_icon_empty">
-          <Launch target="ALARM" />
-          <Image resource="ic_alarm" />
-        </PartImage>
-        <PartText x="0" y="36" width="110" height="28" name="alarm_empty">
-          <Launch target="ALARM" />
-          <Text align="CENTER">
-            <Font family="poppins_medium" size="20" color="#ff9e9e9e">未設定</Font>
-          </Text>
-        </PartText>
-        <PartText x="0" y="62" width="110" height="16" name="alarm_label_empty">
-          <Launch target="ALARM" />
-          <Text align="CENTER">
-            <Font family="SYNC_TO_DEVICE" size="12" color="#ff8a9199">アラーム</Font>
-          </Text>
-        </PartText>
-      </Complication>
-    </ComplicationSlot>
-
-    <!-- Distance (5-7 o'clock, bottom; user assigns a distance complication) -->
-    <ComplicationSlot x="173" y="314" width="104" height="72" slotId="11"
+    <!-- Row 1, centre: distance. ring centre (226,283), radius 33 -->
+    <ComplicationSlot x="184" y="241" width="84" height="86" slotId="11"
         displayName="slot_distance" isCustomizable="TRUE"
-        supportedTypes="GOAL_PROGRESS SHORT_TEXT MONOCHROMATIC_IMAGE EMPTY">
-      <BoundingBox x="0" y="0" width="104" height="72" outlinePadding="2.0" />
+        supportedTypes="GOAL_PROGRESS RANGED_VALUE SHORT_TEXT EMPTY">
+      <BoundingOval x="0" y="0" width="84" height="84" outlinePadding="2.0" />
       <DefaultProviderPolicy defaultSystemProvider="EMPTY" defaultSystemProviderType="EMPTY" />
       <Variant mode="AMBIENT" target="alpha" value="0" />
 
       <Complication type="GOAL_PROGRESS">
-        <PartImage x="40" y="4" width="24" height="24" name="dist_icon">
-          <Image resource="ic_distance" />
-        </PartImage>
+        <PartDraw x="0" y="0" width="84" height="84" name="dist_track_gp">
+          <Arc centerX="42" centerY="42" width="66" height="66" startAngle="-155" endAngle="155">
+            <Stroke color="#ff2f473f" thickness="5" cap="ROUND" />
+          </Arc>
+        </PartDraw>
+        <PartDraw x="0" y="0" width="84" height="84" name="dist_progress_gp">
+          <Arc centerX="42" centerY="42" width="66" height="66" startAngle="-155" endAngle="-155">
+            <Stroke color="#ffcbfdf1" thickness="5" cap="ROUND" />
+            <Transform target="endAngle" value="-155 + ([COMPLICATION.GOAL_PROGRESS_TARGET_VALUE] > 0 ? clamp([COMPLICATION.GOAL_PROGRESS_VALUE] / [COMPLICATION.GOAL_PROGRESS_TARGET_VALUE], 0, 1) : 0) * 310" />
+          </Arc>
+        </PartDraw>
         <Condition>
           <Expressions>
-            <Expression name="dist_has_text"><![CDATA[[COMPLICATION.TEXT] != null]]></Expression>
+            <Expression name="dist_gp_text"><![CDATA[[COMPLICATION.TEXT] != null]]></Expression>
           </Expressions>
-          <Compare expression="dist_has_text">
-            <PartText x="0" y="32" width="104" height="30" name="dist_text">
+          <Compare expression="dist_gp_text">
+            <PartText x="4" y="20" width="76" height="32" name="dist_gp_value">
               <Text align="CENTER" ellipsis="TRUE">
-                <Font family="poppins_medium" size="24" color="#ffffffff">
+                <Font family="poppins_regular" size="24" color="#ffcbfdf1">
                   <Template><![CDATA[%s]]>
                     <Parameter expression="[COMPLICATION.TEXT]" />
                   </Template>
@@ -438,27 +358,111 @@
             </PartText>
           </Compare>
           <Default>
-            <PartText x="0" y="32" width="104" height="30" name="dist_text_na">
+            <PartText x="4" y="20" width="76" height="32" name="dist_gp_na">
               <Text align="CENTER">
-                <Font family="poppins_medium" size="24" color="#ff9e9e9e">--</Font>
+                <Font family="poppins_regular" size="24" color="#ff9ba5b4">--</Font>
               </Text>
             </PartText>
           </Default>
         </Condition>
+        <Condition>
+          <Expressions>
+            <Expression name="dist_gp_title"><![CDATA[[COMPLICATION.TITLE] != null]]></Expression>
+          </Expressions>
+          <Compare expression="dist_gp_title">
+            <PartText x="8" y="49" width="68" height="14" name="dist_gp_unit">
+              <Text align="CENTER" ellipsis="TRUE">
+                <Font family="poppins_regular" size="11" color="#ff9ba5b4">
+                  <Template><![CDATA[%s]]>
+                    <Parameter expression="[COMPLICATION.TITLE]" />
+                  </Template>
+                </Font>
+              </Text>
+            </PartText>
+          </Compare>
+          <Default>
+            <Group x="0" y="0" width="1" height="1" name="dist_gp_unit_none" />
+          </Default>
+        </Condition>
+        <PartImage x="28" y="56" width="28" height="28" name="dist_icon_gp">
+          <Image resource="ic_distance" />
+        </PartImage>
+      </Complication>
+
+      <Complication type="RANGED_VALUE">
+        <PartDraw x="0" y="0" width="84" height="84" name="dist_track_rv">
+          <Arc centerX="42" centerY="42" width="66" height="66" startAngle="-155" endAngle="155">
+            <Stroke color="#ff2f473f" thickness="5" cap="ROUND" />
+          </Arc>
+        </PartDraw>
+        <PartDraw x="0" y="0" width="84" height="84" name="dist_progress_rv">
+          <Arc centerX="42" centerY="42" width="66" height="66" startAngle="-155" endAngle="-155">
+            <Stroke color="#ffcbfdf1" thickness="5" cap="ROUND" />
+            <Transform target="endAngle" value="-155 + ([COMPLICATION.RANGED_VALUE_MAX] > [COMPLICATION.RANGED_VALUE_MIN] ? clamp(([COMPLICATION.RANGED_VALUE_VALUE] - [COMPLICATION.RANGED_VALUE_MIN]) / ([COMPLICATION.RANGED_VALUE_MAX] - [COMPLICATION.RANGED_VALUE_MIN]), 0, 1) : 0) * 310" />
+          </Arc>
+        </PartDraw>
+        <Condition>
+          <Expressions>
+            <Expression name="dist_rv_text"><![CDATA[[COMPLICATION.TEXT] != null]]></Expression>
+          </Expressions>
+          <Compare expression="dist_rv_text">
+            <PartText x="4" y="20" width="76" height="32" name="dist_rv_value">
+              <Text align="CENTER" ellipsis="TRUE">
+                <Font family="poppins_regular" size="24" color="#ffcbfdf1">
+                  <Template><![CDATA[%s]]>
+                    <Parameter expression="[COMPLICATION.TEXT]" />
+                  </Template>
+                </Font>
+              </Text>
+            </PartText>
+          </Compare>
+          <Default>
+            <PartText x="4" y="20" width="76" height="32" name="dist_rv_na">
+              <Text align="CENTER">
+                <Font family="poppins_regular" size="24" color="#ff9ba5b4">--</Font>
+              </Text>
+            </PartText>
+          </Default>
+        </Condition>
+        <Condition>
+          <Expressions>
+            <Expression name="dist_rv_title"><![CDATA[[COMPLICATION.TITLE] != null]]></Expression>
+          </Expressions>
+          <Compare expression="dist_rv_title">
+            <PartText x="8" y="49" width="68" height="14" name="dist_rv_unit">
+              <Text align="CENTER" ellipsis="TRUE">
+                <Font family="poppins_regular" size="11" color="#ff9ba5b4">
+                  <Template><![CDATA[%s]]>
+                    <Parameter expression="[COMPLICATION.TITLE]" />
+                  </Template>
+                </Font>
+              </Text>
+            </PartText>
+          </Compare>
+          <Default>
+            <Group x="0" y="0" width="1" height="1" name="dist_rv_unit_none" />
+          </Default>
+        </Condition>
+        <PartImage x="28" y="56" width="28" height="28" name="dist_icon_rv">
+          <Image resource="ic_distance" />
+        </PartImage>
       </Complication>
 
       <Complication type="SHORT_TEXT">
-        <PartImage x="40" y="4" width="24" height="24" name="dist_icon_st">
-          <Image resource="ic_distance" />
-        </PartImage>
+        <!-- no numeric range available: fully-lit ring -->
+        <PartDraw x="0" y="0" width="84" height="84" name="dist_ring_st">
+          <Arc centerX="42" centerY="42" width="66" height="66" startAngle="-155" endAngle="155">
+            <Stroke color="#ffcbfdf1" thickness="5" cap="ROUND" />
+          </Arc>
+        </PartDraw>
         <Condition>
           <Expressions>
             <Expression name="dist_st_text"><![CDATA[[COMPLICATION.TEXT] != null]]></Expression>
           </Expressions>
           <Compare expression="dist_st_text">
-            <PartText x="0" y="32" width="104" height="30" name="dist_st_val">
+            <PartText x="4" y="20" width="76" height="32" name="dist_st_value">
               <Text align="CENTER" ellipsis="TRUE">
-                <Font family="poppins_medium" size="24" color="#ffffffff">
+                <Font family="poppins_regular" size="24" color="#ffcbfdf1">
                   <Template><![CDATA[%s]]>
                     <Parameter expression="[COMPLICATION.TEXT]" />
                   </Template>
@@ -467,55 +471,86 @@
             </PartText>
           </Compare>
           <Default>
-            <PartText x="0" y="32" width="104" height="30" name="dist_st_na">
+            <PartText x="4" y="20" width="76" height="32" name="dist_st_na">
               <Text align="CENTER">
-                <Font family="poppins_medium" size="24" color="#ff9e9e9e">--</Font>
+                <Font family="poppins_regular" size="24" color="#ff9ba5b4">--</Font>
               </Text>
             </PartText>
           </Default>
         </Condition>
-      </Complication>
-
-      <Complication type="MONOCHROMATIC_IMAGE">
-        <PartImage x="38" y="12" width="28" height="28" name="dist_img">
-          <Image resource="[COMPLICATION.MONOCHROMATIC_IMAGE]" />
+        <Condition>
+          <Expressions>
+            <Expression name="dist_st_title"><![CDATA[[COMPLICATION.TITLE] != null]]></Expression>
+          </Expressions>
+          <Compare expression="dist_st_title">
+            <PartText x="8" y="49" width="68" height="14" name="dist_st_unit">
+              <Text align="CENTER" ellipsis="TRUE">
+                <Font family="poppins_regular" size="11" color="#ff9ba5b4">
+                  <Template><![CDATA[%s]]>
+                    <Parameter expression="[COMPLICATION.TITLE]" />
+                  </Template>
+                </Font>
+              </Text>
+            </PartText>
+          </Compare>
+          <Default>
+            <Group x="0" y="0" width="1" height="1" name="dist_st_unit_none" />
+          </Default>
+        </Condition>
+        <PartImage x="28" y="56" width="28" height="28" name="dist_icon_st">
+          <Image resource="ic_distance" />
         </PartImage>
       </Complication>
 
       <Complication type="EMPTY">
-        <PartImage x="40" y="4" width="24" height="24" name="dist_icon_empty">
+        <!-- nothing assigned: dim track only, tap opens Fitbit -->
+        <PartDraw x="0" y="0" width="84" height="84" name="dist_track_empty">
+          <Launch target="com.fitbit.FitbitMobile" />
+          <Arc centerX="42" centerY="42" width="66" height="66" startAngle="-155" endAngle="155">
+            <Stroke color="#ff2f473f" thickness="5" cap="ROUND" />
+          </Arc>
+        </PartDraw>
+        <PartText x="4" y="20" width="76" height="32" name="dist_empty">
+          <Launch target="com.fitbit.FitbitMobile" />
+          <Text align="CENTER">
+            <Font family="poppins_regular" size="24" color="#ff9ba5b4">--</Font>
+          </Text>
+        </PartText>
+        <PartImage x="28" y="56" width="28" height="28" name="dist_icon_empty">
           <Launch target="com.fitbit.FitbitMobile" />
           <Image resource="ic_distance" />
         </PartImage>
-        <PartText x="0" y="32" width="104" height="30" name="dist_empty">
-          <Launch target="com.fitbit.FitbitMobile" />
-          <Text align="CENTER">
-            <Font family="poppins_medium" size="24" color="#ff9e9e9e">--</Font>
-          </Text>
-        </PartText>
       </Complication>
     </ComplicationSlot>
 
-    <!-- Calories burned (3-5 o'clock, right-lower; user assigns a calorie complication) -->
-    <ComplicationSlot x="272" y="278" width="120" height="68" slotId="12"
+    <!-- Row 1, right: calories burned. ring centre (328,283), radius 33 -->
+    <ComplicationSlot x="286" y="241" width="84" height="86" slotId="12"
         displayName="slot_calories" isCustomizable="TRUE"
-        supportedTypes="GOAL_PROGRESS SHORT_TEXT MONOCHROMATIC_IMAGE EMPTY">
-      <BoundingBox x="0" y="0" width="120" height="68" outlinePadding="2.0" />
+        supportedTypes="GOAL_PROGRESS RANGED_VALUE SHORT_TEXT EMPTY">
+      <BoundingOval x="0" y="0" width="84" height="84" outlinePadding="2.0" />
       <DefaultProviderPolicy defaultSystemProvider="EMPTY" defaultSystemProviderType="EMPTY" />
       <Variant mode="AMBIENT" target="alpha" value="0" />
 
       <Complication type="GOAL_PROGRESS">
-        <PartImage x="48" y="2" width="24" height="24" name="cal_icon">
-          <Image resource="ic_calories" />
-        </PartImage>
+        <PartDraw x="0" y="0" width="84" height="84" name="cal_track_gp">
+          <Arc centerX="42" centerY="42" width="66" height="66" startAngle="-155" endAngle="155">
+            <Stroke color="#ff2f473f" thickness="5" cap="ROUND" />
+          </Arc>
+        </PartDraw>
+        <PartDraw x="0" y="0" width="84" height="84" name="cal_progress_gp">
+          <Arc centerX="42" centerY="42" width="66" height="66" startAngle="-155" endAngle="-155">
+            <Stroke color="#ffcbfdf1" thickness="5" cap="ROUND" />
+            <Transform target="endAngle" value="-155 + ([COMPLICATION.GOAL_PROGRESS_TARGET_VALUE] > 0 ? clamp([COMPLICATION.GOAL_PROGRESS_VALUE] / [COMPLICATION.GOAL_PROGRESS_TARGET_VALUE], 0, 1) : 0) * 310" />
+          </Arc>
+        </PartDraw>
         <Condition>
           <Expressions>
-            <Expression name="cal_has_text"><![CDATA[[COMPLICATION.TEXT] != null]]></Expression>
+            <Expression name="cal_gp_text"><![CDATA[[COMPLICATION.TEXT] != null]]></Expression>
           </Expressions>
-          <Compare expression="cal_has_text">
-            <PartText x="0" y="30" width="120" height="30" name="cal_text">
+          <Compare expression="cal_gp_text">
+            <PartText x="4" y="20" width="76" height="32" name="cal_gp_value">
               <Text align="CENTER" ellipsis="TRUE">
-                <Font family="poppins_medium" size="24" color="#ffffffff">
+                <Font family="poppins_regular" size="24" color="#ffcbfdf1">
                   <Template><![CDATA[%s]]>
                     <Parameter expression="[COMPLICATION.TEXT]" />
                   </Template>
@@ -524,27 +559,110 @@
             </PartText>
           </Compare>
           <Default>
-            <PartText x="0" y="30" width="120" height="30" name="cal_text_na">
+            <PartText x="4" y="20" width="76" height="32" name="cal_gp_na">
               <Text align="CENTER">
-                <Font family="poppins_medium" size="24" color="#ff9e9e9e">--</Font>
+                <Font family="poppins_regular" size="24" color="#ff9ba5b4">--</Font>
               </Text>
             </PartText>
           </Default>
         </Condition>
+        <Condition>
+          <Expressions>
+            <Expression name="cal_gp_title"><![CDATA[[COMPLICATION.TITLE] != null]]></Expression>
+          </Expressions>
+          <Compare expression="cal_gp_title">
+            <PartText x="8" y="49" width="68" height="14" name="cal_gp_unit">
+              <Text align="CENTER" ellipsis="TRUE">
+                <Font family="poppins_regular" size="11" color="#ff9ba5b4">
+                  <Template><![CDATA[%s]]>
+                    <Parameter expression="[COMPLICATION.TITLE]" />
+                  </Template>
+                </Font>
+              </Text>
+            </PartText>
+          </Compare>
+          <Default>
+            <Group x="0" y="0" width="1" height="1" name="cal_gp_unit_none" />
+          </Default>
+        </Condition>
+        <PartImage x="28" y="56" width="28" height="28" name="cal_icon_gp">
+          <Image resource="ic_calories" />
+        </PartImage>
+      </Complication>
+
+      <Complication type="RANGED_VALUE">
+        <PartDraw x="0" y="0" width="84" height="84" name="cal_track_rv">
+          <Arc centerX="42" centerY="42" width="66" height="66" startAngle="-155" endAngle="155">
+            <Stroke color="#ff2f473f" thickness="5" cap="ROUND" />
+          </Arc>
+        </PartDraw>
+        <PartDraw x="0" y="0" width="84" height="84" name="cal_progress_rv">
+          <Arc centerX="42" centerY="42" width="66" height="66" startAngle="-155" endAngle="-155">
+            <Stroke color="#ffcbfdf1" thickness="5" cap="ROUND" />
+            <Transform target="endAngle" value="-155 + ([COMPLICATION.RANGED_VALUE_MAX] > [COMPLICATION.RANGED_VALUE_MIN] ? clamp(([COMPLICATION.RANGED_VALUE_VALUE] - [COMPLICATION.RANGED_VALUE_MIN]) / ([COMPLICATION.RANGED_VALUE_MAX] - [COMPLICATION.RANGED_VALUE_MIN]), 0, 1) : 0) * 310" />
+          </Arc>
+        </PartDraw>
+        <Condition>
+          <Expressions>
+            <Expression name="cal_rv_text"><![CDATA[[COMPLICATION.TEXT] != null]]></Expression>
+          </Expressions>
+          <Compare expression="cal_rv_text">
+            <PartText x="4" y="20" width="76" height="32" name="cal_rv_value">
+              <Text align="CENTER" ellipsis="TRUE">
+                <Font family="poppins_regular" size="24" color="#ffcbfdf1">
+                  <Template><![CDATA[%s]]>
+                    <Parameter expression="[COMPLICATION.TEXT]" />
+                  </Template>
+                </Font>
+              </Text>
+            </PartText>
+          </Compare>
+          <Default>
+            <PartText x="4" y="20" width="76" height="32" name="cal_rv_na">
+              <Text align="CENTER">
+                <Font family="poppins_regular" size="24" color="#ff9ba5b4">--</Font>
+              </Text>
+            </PartText>
+          </Default>
+        </Condition>
+        <Condition>
+          <Expressions>
+            <Expression name="cal_rv_title"><![CDATA[[COMPLICATION.TITLE] != null]]></Expression>
+          </Expressions>
+          <Compare expression="cal_rv_title">
+            <PartText x="8" y="49" width="68" height="14" name="cal_rv_unit">
+              <Text align="CENTER" ellipsis="TRUE">
+                <Font family="poppins_regular" size="11" color="#ff9ba5b4">
+                  <Template><![CDATA[%s]]>
+                    <Parameter expression="[COMPLICATION.TITLE]" />
+                  </Template>
+                </Font>
+              </Text>
+            </PartText>
+          </Compare>
+          <Default>
+            <Group x="0" y="0" width="1" height="1" name="cal_rv_unit_none" />
+          </Default>
+        </Condition>
+        <PartImage x="28" y="56" width="28" height="28" name="cal_icon_rv">
+          <Image resource="ic_calories" />
+        </PartImage>
       </Complication>
 
       <Complication type="SHORT_TEXT">
-        <PartImage x="48" y="2" width="24" height="24" name="cal_icon_st">
-          <Image resource="ic_calories" />
-        </PartImage>
+        <PartDraw x="0" y="0" width="84" height="84" name="cal_ring_st">
+          <Arc centerX="42" centerY="42" width="66" height="66" startAngle="-155" endAngle="155">
+            <Stroke color="#ffcbfdf1" thickness="5" cap="ROUND" />
+          </Arc>
+        </PartDraw>
         <Condition>
           <Expressions>
             <Expression name="cal_st_text"><![CDATA[[COMPLICATION.TEXT] != null]]></Expression>
           </Expressions>
           <Compare expression="cal_st_text">
-            <PartText x="0" y="30" width="120" height="30" name="cal_st_val">
+            <PartText x="4" y="20" width="76" height="32" name="cal_st_value">
               <Text align="CENTER" ellipsis="TRUE">
-                <Font family="poppins_medium" size="24" color="#ffffffff">
+                <Font family="poppins_regular" size="24" color="#ffcbfdf1">
                   <Template><![CDATA[%s]]>
                     <Parameter expression="[COMPLICATION.TEXT]" />
                   </Template>
@@ -553,32 +671,117 @@
             </PartText>
           </Compare>
           <Default>
-            <PartText x="0" y="30" width="120" height="30" name="cal_st_na">
+            <PartText x="4" y="20" width="76" height="32" name="cal_st_na">
               <Text align="CENTER">
-                <Font family="poppins_medium" size="24" color="#ff9e9e9e">--</Font>
+                <Font family="poppins_regular" size="24" color="#ff9ba5b4">--</Font>
               </Text>
             </PartText>
           </Default>
         </Condition>
-      </Complication>
-
-      <Complication type="MONOCHROMATIC_IMAGE">
-        <PartImage x="46" y="10" width="28" height="28" name="cal_img">
-          <Image resource="[COMPLICATION.MONOCHROMATIC_IMAGE]" />
+        <Condition>
+          <Expressions>
+            <Expression name="cal_st_title"><![CDATA[[COMPLICATION.TITLE] != null]]></Expression>
+          </Expressions>
+          <Compare expression="cal_st_title">
+            <PartText x="8" y="49" width="68" height="14" name="cal_st_unit">
+              <Text align="CENTER" ellipsis="TRUE">
+                <Font family="poppins_regular" size="11" color="#ff9ba5b4">
+                  <Template><![CDATA[%s]]>
+                    <Parameter expression="[COMPLICATION.TITLE]" />
+                  </Template>
+                </Font>
+              </Text>
+            </PartText>
+          </Compare>
+          <Default>
+            <Group x="0" y="0" width="1" height="1" name="cal_st_unit_none" />
+          </Default>
+        </Condition>
+        <PartImage x="28" y="56" width="28" height="28" name="cal_icon_st">
+          <Image resource="ic_calories" />
         </PartImage>
       </Complication>
 
       <Complication type="EMPTY">
-        <PartImage x="48" y="2" width="24" height="24" name="cal_icon_empty">
+        <PartDraw x="0" y="0" width="84" height="84" name="cal_track_empty">
+          <Launch target="com.fitbit.FitbitMobile" />
+          <Arc centerX="42" centerY="42" width="66" height="66" startAngle="-155" endAngle="155">
+            <Stroke color="#ff2f473f" thickness="5" cap="ROUND" />
+          </Arc>
+        </PartDraw>
+        <PartText x="4" y="20" width="76" height="32" name="cal_empty">
+          <Launch target="com.fitbit.FitbitMobile" />
+          <Text align="CENTER">
+            <Font family="poppins_regular" size="24" color="#ff9ba5b4">--</Font>
+          </Text>
+        </PartText>
+        <PartImage x="28" y="56" width="28" height="28" name="cal_icon_empty">
           <Launch target="com.fitbit.FitbitMobile" />
           <Image resource="ic_calories" />
         </PartImage>
-        <PartText x="0" y="30" width="120" height="30" name="cal_empty">
-          <Launch target="com.fitbit.FitbitMobile" />
+      </Complication>
+    </ComplicationSlot>
+
+    <!-- Row 2, right: next alarm. ring centre (276,374), radius 28 -->
+    <ComplicationSlot x="240" y="338" width="72" height="78" slotId="10"
+        displayName="slot_alarm" isCustomizable="TRUE"
+        supportedTypes="SHORT_TEXT EMPTY">
+      <BoundingOval x="0" y="0" width="72" height="72" outlinePadding="2.0" />
+      <DefaultProviderPolicy defaultSystemProvider="EMPTY" defaultSystemProviderType="EMPTY" />
+      <Variant mode="AMBIENT" target="alpha" value="0" />
+
+      <Complication type="SHORT_TEXT">
+        <PartDraw x="0" y="0" width="72" height="72" name="alarm_ring_st">
+          <Arc centerX="36" centerY="36" width="56" height="56" startAngle="-155" endAngle="155">
+            <Stroke color="#ffcbfdf1" thickness="5" cap="ROUND" />
+          </Arc>
+        </PartDraw>
+        <Condition>
+          <Expressions>
+            <Expression name="alarm_has_text"><![CDATA[[COMPLICATION.TEXT] != null]]></Expression>
+          </Expressions>
+          <Compare expression="alarm_has_text">
+            <PartText x="4" y="18" width="64" height="32" name="alarm_text">
+              <Text align="CENTER" ellipsis="TRUE">
+                <Font family="poppins_regular" size="22" color="#ffcbfdf1">
+                  <Template><![CDATA[%s]]>
+                    <Parameter expression="[COMPLICATION.TEXT]" />
+                  </Template>
+                </Font>
+              </Text>
+            </PartText>
+          </Compare>
+          <Default>
+            <PartText x="4" y="18" width="64" height="32" name="alarm_none">
+              <Text align="CENTER">
+                <Font family="SYNC_TO_DEVICE" size="16" color="#ff9ba5b4">なし</Font>
+              </Text>
+            </PartText>
+          </Default>
+        </Condition>
+        <PartImage x="24" y="48" width="24" height="24" name="alarm_icon_st">
+          <Image resource="ic_alarm" />
+        </PartImage>
+      </Complication>
+
+      <Complication type="EMPTY">
+        <!-- no provider assigned: dim track, tap opens the alarm app -->
+        <PartDraw x="0" y="0" width="72" height="72" name="alarm_track_empty">
+          <Launch target="ALARM" />
+          <Arc centerX="36" centerY="36" width="56" height="56" startAngle="-155" endAngle="155">
+            <Stroke color="#ff2f473f" thickness="5" cap="ROUND" />
+          </Arc>
+        </PartDraw>
+        <PartText x="4" y="18" width="64" height="32" name="alarm_empty">
+          <Launch target="ALARM" />
           <Text align="CENTER">
-            <Font family="poppins_medium" size="24" color="#ff9e9e9e">--</Font>
+            <Font family="SYNC_TO_DEVICE" size="14" color="#ff9ba5b4">未設定</Font>
           </Text>
         </PartText>
+        <PartImage x="24" y="48" width="24" height="24" name="alarm_icon_empty">
+          <Launch target="ALARM" />
+          <Image resource="ic_alarm" />
+        </PartImage>
       </Complication>
     </ComplicationSlot>
 
