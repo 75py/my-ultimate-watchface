@@ -11,6 +11,18 @@ Google Pixel Watch（円形ディスプレイ）向けの Watch Face Format (WFF
 デザインは Figma で作成したパステル配色のレイアウト（Watch Face Designer 形式でエクスポート済み）を
 ベースに、太字の時刻・進捗連動のセグメントリング・Material Symbols アイコンでスタイルを整えたものです。
 
+## スクリーンショット
+
+`docs/screenshots/` の画像は `watchface.xml` と同じ座標を Pillow で再現したモックレンダリングです
+（システムフォントは Roboto / Noto Sans JP で代用。実機・エミュレータのキャプチャではありません）。
+
+| 通常表示（ミント・既定） | ブルー | オレンジ | AOD |
+|---|---|---|---|
+| ![通常表示 ミント](docs/screenshots/interactive_mint.png) | ![ブルー](docs/screenshots/interactive_blue.png) | ![オレンジ](docs/screenshots/interactive_orange.png) | ![AOD](docs/screenshots/ambient.png) |
+
+極端な値（23:58、氷点下、長い天候名、5桁の歩数、目標達成、心拍未取得、アラーム未設定）の確認用:
+`docs/screenshots/interactive_edge_cases.png`
+
 ## 技術構成
 
 | 項目 | 値 |
@@ -198,7 +210,7 @@ adb install -r watchface/build/outputs/apk/debug/watchface-debug.apk
 - 公式 WFF バリデータ（google/watchface の `third_party/wff/specification/validator` を
   ソースからビルド、フォーマットバージョン 2）: **PASSED**
 - XML が参照する drawable リソースがすべて存在し、未参照の drawable がないこと
-- `preview.png` は XML と同じ座標を Pillow で再現したモックレンダリング
+- `preview.png` と `docs/screenshots/*.png` は XML と同じ座標を Pillow で再現したモックレンダリング
   （システムフォントは Roboto / Noto Sans JP で代用）
 
 未検証（Figma 版では検証済みだったが、スタイル調整後は再確認が必要な項目を含む）:
