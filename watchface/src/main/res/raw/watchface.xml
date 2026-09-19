@@ -21,6 +21,7 @@
   for GOAL_PROGRESS / RANGED_VALUE providers and show only the dim track for
   SHORT_TEXT / EMPTY. All three arcs fill counter-clockwise (left -> bottom
   -> right), matching sample.png.
+  There are no hour tick marks on the rim.
   Ambient (AOD): only the date and HH:MM remain, dimmed, at identical positions.
 
   This file is generated from a small template script; it is also fine to
@@ -129,22 +130,6 @@
     <!-- ============================================================ -->
     <Group x="0" y="0" width="450" height="450" name="interactive_only" alpha="255">
       <Variant mode="AMBIENT" target="alpha" value="0" />
-
-      <!-- rim tick marks every 30 degrees -->
-      <PartDraw x="0" y="0" width="450" height="450" name="ticks">
-        <Line startX="225.0" startY="6.0" endX="225.0" endY="18.0"><Stroke color="#ff3a4046" thickness="2.5" cap="ROUND" /></Line>
-        <Line startX="334.5" startY="35.3" endX="328.5" endY="45.7"><Stroke color="#ff3a4046" thickness="2.5" cap="ROUND" /></Line>
-        <Line startX="414.7" startY="115.5" endX="404.3" endY="121.5"><Stroke color="#ff3a4046" thickness="2.5" cap="ROUND" /></Line>
-        <Line startX="444.0" startY="225.0" endX="432.0" endY="225.0"><Stroke color="#ff3a4046" thickness="2.5" cap="ROUND" /></Line>
-        <Line startX="414.7" startY="334.5" endX="404.3" endY="328.5"><Stroke color="#ff3a4046" thickness="2.5" cap="ROUND" /></Line>
-        <Line startX="334.5" startY="414.7" endX="328.5" endY="404.3"><Stroke color="#ff3a4046" thickness="2.5" cap="ROUND" /></Line>
-        <Line startX="225.0" startY="444.0" endX="225.0" endY="432.0"><Stroke color="#ff3a4046" thickness="2.5" cap="ROUND" /></Line>
-        <Line startX="115.5" startY="414.7" endX="121.5" endY="404.3"><Stroke color="#ff3a4046" thickness="2.5" cap="ROUND" /></Line>
-        <Line startX="35.3" startY="334.5" endX="45.7" endY="328.5"><Stroke color="#ff3a4046" thickness="2.5" cap="ROUND" /></Line>
-        <Line startX="6.0" startY="225.0" endX="18.0" endY="225.0"><Stroke color="#ff3a4046" thickness="2.5" cap="ROUND" /></Line>
-        <Line startX="35.3" startY="115.5" endX="45.7" endY="121.5"><Stroke color="#ff3a4046" thickness="2.5" cap="ROUND" /></Line>
-        <Line startX="115.5" startY="35.3" endX="121.5" endY="45.7"><Stroke color="#ff3a4046" thickness="2.5" cap="ROUND" /></Line>
-      </PartDraw>
 
       <!-- dim rim tracks for the three progress arcs (ring radius 200,
            thickness 10): steps green 9-7 o'clock, distance blue 7-5 o'clock,
