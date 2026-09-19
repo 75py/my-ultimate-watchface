@@ -7,6 +7,12 @@
     <string name="slot_distance">距離</string>
     <string name="slot_calories">消費カロリー</string>
 
+    <!-- Theme color options shown in the watch face editor -->
+    <string name="color_theme">テーマカラー</string>
+    <string name="color_mint">Mint</string>
+    <string name="color_blue">Blue</string>
+    <string name="color_orange">Orange</string>
+
     <!-- Fallback strings -->
     <string name="no_data">--</string>
     <string name="no_alarm">なし</string>
