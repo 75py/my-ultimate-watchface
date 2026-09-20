@@ -10,4 +10,12 @@
     <!-- Fallback strings -->
     <string name="no_data">--</string>
     <string name="no_alarm">なし</string>
+
+    <!-- Color theme picker shown in the watch face editor -->
+    <string name="theme_colors">カラーテーマ</string>
+    <string name="theme_mint">ミントグリーン</string>
+    <string name="theme_blue">ブルー</string>
+    <string name="theme_lavender">ラベンダー</string>
+    <string name="theme_amber">アンバー</string>
+    <string name="theme_rose">ローズ</string>
 </resources>
